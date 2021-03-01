@@ -1,9 +1,9 @@
 #!/bin/bash
 programDir="${HOME}/program/ayrix/"
-serverHostname="ubuntu"
-serverAddress="ayrix.telemo.io"
-serverUploadPath="/home/ubuntu/"
-pemfilePath="${HOME}/Documents/api_server_gateway.pem"
+serverHostname="<hostname of server>"
+serverAddress="<domain name of server>"
+serverUploadPath="<server uploade path >"
+pemfilePath="pem file absolute path"
 function checkError(){
   if [[ $? != 0 ]]
    then
@@ -25,5 +25,5 @@ cd
 scp -i  ${pemfilePath} ${programDir}dist.tar.xz  ${serverHostname}@${serverAddress}:${serverUploadPath}
 checkError
 echo "---dist.tar.xz uploaded to server---"
-ssh -i  Documents/api_server_gateway.pem ubuntu@ayrix.telemo.io "bash -s" < ${HOME}/program/updateBuild.bash
+ssh -i  <relative or absolute pem file path> ubuntu@ayrix.telemo.io "bash -s" < ${HOME}/program/updateBuild.bash
 
