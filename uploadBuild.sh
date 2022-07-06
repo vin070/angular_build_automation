@@ -1,29 +1,37 @@
 #!/bin/bash
-programDir="${HOME}/program/ayrix/"
-serverHostname="<hostname of server>"
-serverAddress="<domain name of server>"
-serverUploadPath="<server uploade path >"
-pemfilePath="pem file absolute path"
-function checkError(){
+program_dir="Absolute project path directory"
+
+server_details=("Server ip or domain name used in ssh config file" "Upload path on server" "Extract path on server");
+
+function check_error(){
   if [[ $? != 0 ]]
    then
-     echo 'ERROR'
+     echo "ERROR $1"
      exit
    fi
 }
-cd $programDir
-ng build --prod 
-checkError
-echo "---BUILD GENERATED---"
- rm dist.tar.xz 
-checkError
-echo "---PREVIOUS dist.tar.xz REMOVED--- "
-tar -cJf dist.tar.xz dist  
-checkError
-echo "---dist.tar.xz file CREATED---"
-cd 
-scp -i  ${pemfilePath} ${programDir}dist.tar.xz  ${serverHostname}@${serverAddress}:${serverUploadPath}
-checkError
-echo "---dist.tar.xz uploaded to server---"
-ssh -i  <relative or absolute pem file path> ubuntu@ayrix.telemo.io "bash -s" < ${HOME}/program/updateBuild.bash
+
+function upload_build(){
+    build_flag=$1;
+    server_domain_name=$2;
+    upload_path=$3;
+    update_path=$4;
+
+    cd $program_dir
+    ng build ${build_flag} 
+    check_error "ng build ${build_flag}"
+    echo "---BUILD GENERATED FOR ${server_domain_name}---"
+    rm dist.tar.xz 
+    echo "---PREVIOUS dist.tar.xz REMOVED SUBJECT TO AVAILABILITY--- "
+    tar -cJf dist.tar.xz dist  
+    check_error "tar -cJf dist.tar.xz dist"
+    echo "---dist.tar.xz file CREATED---"
+    cd 
+    scp ${program_dir}/dist.tar.xz  ${server_domain_name}:${upload_path}
+    check_error "scp ${program_dir}/dist.tar.xz  ${server_domain_name}:${upload_path}"
+    echo "---dist.tar.xz uploaded to ${server_domain_name} at ${upload_path} path---"
+    ssh ${server_domain_name} "bash -s" < ${program_dir}/updateBuild.bash ${update_path} ${upload_path}
+}
+
+upload_build "--prod" ${server_details[0]} ${server_details[1]} ${server_details[2]};
 
